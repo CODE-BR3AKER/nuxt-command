@@ -1,10 +1,31 @@
 {
-  "name": "my-module",
+  "name": "nuxt-command",
   "version": "1.0.0",
-  "description": "My new Nuxt module",
-  "repository": "your-org/my-module",
+  "description": "A customizable command menu (⌘K) interface for Nuxt applications with fuzzy search and keyboard navigation",
+  "repository": {
+    "type": "git",
+    "url": "github:code-br3aker/nuxt-command"
+  },
   "license": "MIT",
   "type": "module",
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "command-menu",
+    "command-palette",
+    "omnibar",
+    "spotlight",
+    "command-k",
+    "cmdk",
+    "quick-search",
+    "keyboard-shortcuts",
+    "search-interface",
+    "vue",
+    "vue3",
+    "modal",
+    "fuzzy-search",
+    "navigation"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types.d.ts",

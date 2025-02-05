@@ -43,7 +43,6 @@
               </div>
             </template>
             <div v-else class="command-empty">
-              <Search :size="20" class="command-empty__icon" :stroke-width="1.5" />
               <p>No results found</p>
             </div>
           </div>
@@ -57,7 +56,6 @@
 import { useCommandMenu } from "../composables/useCommandMenu";
 import { useRuntimeConfig, onMounted, ref, computed, watch } from "#imports";
 import type { CommandMenuItem } from "../../types";
-import { Search } from 'lucide-vue-next'
 
 const props = defineProps<{
   items: CommandMenuItem[];
