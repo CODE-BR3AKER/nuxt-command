@@ -1,7 +1,10 @@
 <template>
   <div
     class="command-menu-item"
-    :class="{ 'command-menu-item--selected': selected }"
+    :class="{
+      'command-menu-item--selected': selected,
+      'command-menu-item--active': item.active
+    }"
     @click="$emit('select', item)"
   >
     <div class="command-menu-item__content">
@@ -107,5 +110,13 @@ defineEmits<{
   min-width: 16px;
   padding: 0 2px;
   text-align: center;
+}
+
+.command-menu-item--active {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.command-menu-item__active {
+  color: #10B981; /* Emerald-500 */
 }
 </style>

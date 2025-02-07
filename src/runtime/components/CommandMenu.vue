@@ -4,14 +4,13 @@
       <div
         v-if="isOpen"
         class="command-overlay"
-        :class="themeClass"
-        :style="{ '--command-opacity': opacity }"
+        :class="`command-theme-${theme}`"
         @click="close"
       >
         <div
           class="command-modal"
-          :class="themeClass"
-          :style="modalStyle"
+          :class="`command-theme-${theme}`"
+          :style="{ ...modalStyle, opacity: opacity }"
           @click.stop
         >
           <div class="command-search">
@@ -19,7 +18,7 @@
             <input
               v-model="searchInput"
               type="text"
-              placeholder="Type a command or search..."
+              :placeholder="options.placeholder"
               class="command-search__input"
               @keydown.stop
               @keydown.down.prevent="navigateDown"
@@ -31,13 +30,13 @@
 
           <div v-if="showResults" class="command-results">
             <template v-if="filteredItems.length">
-              <div v-for="(group, index) in filteredItems" :key="index" class="command-group">
+              <div v-for="(group, groupIndex) in filteredItems" :key="groupIndex" class="command-group">
                 <div v-if="group.label" class="command-group__label">{{ group.label }}</div>
                 <CommandMenuItem
-                  v-for="item in group.items"
+                  v-for="(item, itemIndex) in group.items"
                   :key="item.id"
                   :item="item"
-                  :selected="false"
+                  :selected="isItemSelected(groupIndex, itemIndex)"
                   @select="handleSelect"
                 />
               </div>
@@ -55,11 +54,21 @@
 <script setup lang="ts">
 import { useCommandMenu } from "../composables/useCommandMenu";
 import { useRuntimeConfig, onMounted, ref, computed, watch } from "#imports";
-import type { CommandMenuItem } from "../../types";
+import { Search } from "lucide-vue-next";
+import type { PropType } from 'vue'
+import { nextTick } from "vue";
+import type { CommandMenuGroup } from '../../types'
 
-const props = defineProps<{
-  items: CommandMenuItem[];
-}>();
+const props = defineProps({
+  items: {
+    type: Array as PropType<CommandMenuGroup[]>,
+    required: true
+  },
+  theme: {
+    type: String as PropType<'light' | 'dark' | 'system'>,
+    default: 'system'
+  }
+})
 
 const config = useRuntimeConfig();
 const options = config.public.commandMenu;
@@ -101,8 +110,8 @@ const placeholder = computed(
 );
 
 const themeClass = computed(() => {
-  if (options?.theme === "dark") return "command-theme-dark";
-  if (options?.theme === "light") return "command-theme-light";
+  if (props?.theme === "dark") return "command-theme-dark";
+  if (props?.theme === "light") return "command-theme-light";
   // Handle system theme
   return typeof window !== "undefined" &&
     window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -115,22 +124,33 @@ const modalStyle = computed(() => ({
   minWidth: options?.style?.minWidth || "300px",
 }));
 
-const opacity = computed(() => {
-  const transparency = options?.transparency ?? 0.2;
-  return 1 - Math.max(0, Math.min(1, transparency));
-});
+const opacity = computed(() => options?.style?.opacity ?? 1);
 
 // Auto-focus search input when opened
 onMounted(() => {
   watch(isOpen, (newValue) => {
-    if (newValue && searchInput.value) {
+    if (newValue) {
       nextTick(() => {
-        searchInput.value?.focus();
+        const input = document.querySelector('.command-search__input') as HTMLInputElement;
+        if (input) input.focus();
       });
     }
   });
   setMinimal(options?.minimal ?? true);
 });
+
+const isItemSelected = (groupIndex: number, itemIndex: number) => {
+  let currentIndex = -1;
+  for (let i = 0; i <= groupIndex; i++) {
+    const group = filteredItems.value[i];
+    if (i === groupIndex) {
+      currentIndex += itemIndex + 1;
+      break;
+    }
+    currentIndex += group.items.length;
+  }
+  return currentIndex === selectedIndex.value;
+};
 </script>
 
 <style>
@@ -212,17 +232,27 @@ onMounted(() => {
 }
 
 /* Add theme classes */
-.command-theme-light {
-  --command-bg-color: rgba(255, 255, 255, 0.9);
-  --command-text-color: #111827;
-  --command-border-color: rgba(0, 0, 0, 0.1);
-  --command-overlay-color: rgba(0, 0, 0, 0.2);
+.command-theme-dark {
+  --command-bg-color: #111827;
+  --command-text-color: #ffffff;
+  --command-border-color: #ffffff1a;
+  --command-overlay-color: #00000066;
 }
 
-.command-theme-dark {
-  --command-bg-color: rgba(23, 23, 23, 0.9);
-  --command-text-color: #ffffff;
-  --command-border-color: rgba(255, 255, 255, 0.1);
-  --command-overlay-color: rgba(0, 0, 0, 0.4);
+.command-theme-light {
+  --command-bg-color: #ffffff;
+  --command-text-color: #111827;
+  --command-border-color: #0000001a;
+  --command-overlay-color: #00000033;
+}
+
+.command-overlay {
+  background-color: var(--command-overlay-color);
+}
+
+.command-modal {
+  background-color: var(--command-bg-color);
+  color: var(--command-text-color);
+  border-color: var(--command-border-color);
 }
 </style>

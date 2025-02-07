@@ -6,9 +6,17 @@ import Fuse from "fuse.js";
 const isOpen = ref(false);
 const search = ref("");
 const items = ref<CommandMenuGroup[]>([]);
-const selectedIndex = ref(0);
+const selectedIndex = ref(-1);
 const minimal = ref(true);
 const transparency = ref(0.2);
+
+// Get flattened list of items for navigation
+const flattenedItems = computed(() => {
+  if (!search.value) {
+    return items.value.flatMap(group => group.items);
+  }
+  return filteredItems.value.flatMap(group => group.items);
+});
 
 const filteredItems = computed(() => {
   if (!search.value) return items.value;
@@ -30,21 +38,25 @@ const opacity = computed(() => {
 });
 
 const navigateUp = () => {
-  selectedIndex.value =
-    selectedIndex.value <= 0
-      ? filteredItems.value.length - 1
-      : selectedIndex.value - 1;
+  const total = flattenedItems.value.length;
+  if (total === 0) return;
+
+  selectedIndex.value = selectedIndex.value <= 0
+    ? total - 1
+    : selectedIndex.value - 1;
 };
 
 const navigateDown = () => {
-  selectedIndex.value =
-    selectedIndex.value >= filteredItems.value.length - 1
-      ? 0
-      : selectedIndex.value + 1;
+  const total = flattenedItems.value.length;
+  if (total === 0) return;
+
+  selectedIndex.value = selectedIndex.value >= total - 1
+    ? 0
+    : selectedIndex.value + 1;
 };
 
 const selectCurrent = () => {
-  const currentItem = filteredItems.value[selectedIndex.value];
+  const currentItem = flattenedItems.value[selectedIndex.value];
   if (currentItem) {
     handleSelect(currentItem);
   }
@@ -54,7 +66,7 @@ const toggle = () => {
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
     search.value = "";
-    selectedIndex.value = 0;
+    selectedIndex.value = -1;
   }
 };
 
@@ -90,9 +102,9 @@ export function useCommandMenu() {
     isOpen,
     search,
     items,
+    selectedIndex,
     setItems,
     filteredItems,
-    selectedIndex,
     showResults,
     opacity,
     toggle,

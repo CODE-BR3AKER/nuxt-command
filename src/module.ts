@@ -20,13 +20,11 @@ export default defineNuxtModule<CommandMenuOptions>({
   // Default configuration options of the Nuxt module
   defaults: {
     placeholder: "Search commands...",
-    theme: "system",
     shortcut: ["meta", "k"],
     fuzzySearch: true,
     showShortcuts: true,
     closeOnSelect: true,
     minimal: false,
-    transparency: 1,
     style: {
       maxWidth: "600px",
       minWidth: "300px",
@@ -35,6 +33,7 @@ export default defineNuxtModule<CommandMenuOptions>({
       overlayColor: "rgba(0, 0, 0, 0.2)",
       darkOverlayColor: "rgba(0, 0, 0, 0.4)",
       blur: "12px",
+      opacity: 1
     },
   },
   setup(options, nuxt) {

@@ -13,13 +13,11 @@ export interface CommandMenuItem {
 
 export interface CommandMenuOptions {
   placeholder?: string;
-  theme?: "light" | "dark" | "system";
   shortcut?: string[];
   fuzzySearch?: boolean;
   showShortcuts?: boolean;
   closeOnSelect?: boolean;
   minimal?: boolean;
-  transparency?: number;
   style?: {
     maxWidth?: string;
     minWidth?: string;
@@ -28,5 +26,6 @@ export interface CommandMenuOptions {
     overlayColor?: string;
     darkOverlayColor?: string;
     blur?: string;
+    opacity?: number;
   };
 }
