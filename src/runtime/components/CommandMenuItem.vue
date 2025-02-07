@@ -14,7 +14,10 @@
         :size="16"
         :stroke-width="1.5"
       />
-      <span class="command-menu-item__label">{{ item.label }}</span>
+      <div class="command-menu-item__text">
+        <div class="command-menu-item__label">{{ item.label }}</div>
+        <div v-if="item.description" class="command-menu-item__description" v-html="highlightedDescription"></div>
+      </div>
     </div>
     <div v-if="item.shortcut" class="command-menu-item__shortcut">
       <span v-for="(key, i) in item.shortcut" :key="i" class="shortcut-key">
@@ -27,11 +30,43 @@
 <script setup lang="ts">
 import type { CommandMenuItem } from '../../types'
 import * as lucideIcons from 'lucide-vue-next'
+import { computed } from 'vue'
+import { useCommandMenu } from '../composables/useCommandMenu'
 
 const props = defineProps<{
   item: CommandMenuItem
   selected: boolean
 }>()
+
+const { search, getMatchesForItem } = useCommandMenu()
+
+const highlightedDescription = computed(() => {
+  if (!props.item.description || !search.value) return props.item.description
+
+  const matches = getMatchesForItem(props.item)
+  if (!matches?.length) return props.item.description
+
+  let desc = props.item.description
+  const searchLower = search.value.toLowerCase()
+
+  // Sort indices in reverse to avoid index shifting when replacing
+  const indices = matches
+    .filter(match => match.key === 'description')
+    .flatMap(match => match.indices)
+    .sort((a, b) => b[0] - a[0])
+
+  indices.forEach(([start, end]) => {
+    const matchText = desc.slice(start, end + 1)
+    const isExactMatch = matchText.toLowerCase() === searchLower
+    const markClass = isExactMatch ? 'mark-exact' : 'mark-partial'
+
+    const before = desc.slice(0, start)
+    const after = desc.slice(end + 1)
+    desc = before + `<mark class="${markClass}">` + matchText + '</mark>' + after
+  })
+
+  return desc
+})
 
 // Get icon component dynamically
 const getIcon = () => {
@@ -92,6 +127,12 @@ defineEmits<{
   flex-shrink: 0;
 }
 
+.command-menu-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .command-menu-item__label {
   font-size: 14px;
   color: var(--command-text-color);
@@ -118,5 +159,34 @@ defineEmits<{
 
 .command-menu-item__active {
   color: var(--command-active-color);
+}
+
+.command-menu-item__description {
+  font-size: 12px;
+  color: var(--command-secondary-color);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.command-menu-item__description .mark-exact {
+  background-color: lemonchiffon;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.command-menu-item__description .mark-partial {
+  background-color: #e6f3ff; /* Light blue */
+  color: #0066cc; /* Darker blue for text */
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Dark mode */
+:root[class~="dark"] .command-menu-item__description .mark-partial {
+  background-color: #1a365d; /* Darker blue background */
+  color: #60a5fa; /* Lighter blue text */
 }
 </style>

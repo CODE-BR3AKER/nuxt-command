@@ -6,6 +6,7 @@ export interface CommandMenuGroup {
 export interface CommandMenuItem {
   id: string;
   label: string;
+  description?: string;
   icon?: string;
   shortcut?: string[];
   handler?: () => void;
