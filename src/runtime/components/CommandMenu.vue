@@ -58,6 +58,7 @@ import { Search } from "lucide-vue-next";
 import type { PropType } from 'vue'
 import { nextTick } from "vue";
 import type { CommandMenuGroup } from '../../types'
+import { useCommandTheme } from '../composables/useCommandTheme'
 
 const props = defineProps({
   items: {
@@ -91,6 +92,8 @@ const {
   setMinimal,
 } = useCommandMenu();
 
+const { initializeThemeColors } = useCommandTheme()
+
 // Watch for props.items changes and update the composable
 watch(
   () => props.items,
@@ -105,19 +108,6 @@ watch(searchInput, (value) => {
   search.value = value;
 });
 
-const placeholder = computed(
-  () => options?.placeholder ?? "Search commands..."
-);
-
-const themeClass = computed(() => {
-  if (props?.theme === "dark") return "command-theme-dark";
-  if (props?.theme === "light") return "command-theme-light";
-  // Handle system theme
-  return typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "command-theme-dark"
-    : "command-theme-light";
-});
 
 const modalStyle = computed(() => ({
   maxWidth: options?.style?.maxWidth || "600px",
@@ -137,6 +127,7 @@ onMounted(() => {
     }
   });
   setMinimal(options?.minimal ?? true);
+  initializeThemeColors()
 });
 
 const isItemSelected = (groupIndex: number, itemIndex: number) => {
@@ -154,10 +145,28 @@ const isItemSelected = (groupIndex: number, itemIndex: number) => {
 </script>
 
 <style>
+.command-theme-light {
+  --command-bg-color: var(--command-light-background);
+  --command-text-color: var(--command-light-text);
+  --command-border-color: var(--command-light-border);
+  --command-overlay-color: var(--command-light-overlay);
+  --command-secondary-color: var(--command-light-secondary);
+  --command-hover-bg: var(--command-light-hover);
+}
+
+.command-theme-dark {
+  --command-bg-color: var(--command-dark-background);
+  --command-text-color: var(--command-dark-text);
+  --command-border-color: var(--command-dark-border);
+  --command-overlay-color: var(--command-dark-overlay);
+  --command-secondary-color: var(--command-dark-secondary);
+  --command-hover-bg: var(--command-dark-hover);
+}
+
 .command-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--command-overlay-color);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -167,23 +176,23 @@ const isItemSelected = (groupIndex: number, itemIndex: number) => {
 .command-modal {
   width: 100%;
   max-width: 480px;
-  background: white;
+  background: var(--command-bg-color);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow: hidden;
-  margin: 0 16px; /* Add horizontal margin */
+  margin: 0 16px;
 }
 
 .command-search {
-  padding: 12px 16px; /* Increased horizontal padding */
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--command-border-color);
 }
 
 .command-search__icon {
-  color: #6b7280;
+  color: var(--command-secondary-color);
   margin-right: 12px;
 }
 
@@ -192,31 +201,31 @@ const isItemSelected = (groupIndex: number, itemIndex: number) => {
   border: none;
   background: transparent;
   font-size: 14px;
-  color: #374151;
+  color: var(--command-text-color);
   outline: none;
 }
 
 .command-search__input::placeholder {
-  color: #9ca3af;
+  color: var(--command-secondary-color);
 }
 
 .command-results {
   max-height: 400px;
   overflow-y: auto;
-  padding: 8px 12px 12px; /* Increased padding, especially bottom */
+  padding: 8px 12px 12px;
 }
 
 .command-group__label {
   padding: 8px 4px 6px;
-  color: #9ca3af; /* Lighter color */
-  font-size: 12px; /* Smaller font */
+  color: var(--command-secondary-color);
+  font-size: 12px;
   font-weight: 500;
 }
 
 .command-empty {
   padding: 8px;
   text-align: center;
-  color: #6b7280;
+  color: var(--command-secondary-color);
   font-size: 13px;
 }
 
@@ -232,20 +241,6 @@ const isItemSelected = (groupIndex: number, itemIndex: number) => {
 }
 
 /* Add theme classes */
-.command-theme-dark {
-  --command-bg-color: #111827;
-  --command-text-color: #ffffff;
-  --command-border-color: #ffffff1a;
-  --command-overlay-color: #00000066;
-}
-
-.command-theme-light {
-  --command-bg-color: #ffffff;
-  --command-text-color: #111827;
-  --command-border-color: #0000001a;
-  --command-overlay-color: #00000033;
-}
-
 .command-overlay {
   background-color: var(--command-overlay-color);
 }

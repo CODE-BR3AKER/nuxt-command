@@ -20,11 +20,25 @@ export default defineNuxtConfig({
   command: {
     style: {
       maxWidth: "400px",
-      backgroundColor: "rgba(255, 255, 255, 1)",
-      darkBackgroundColor: "rgba(23, 23, 23, 1)",
-      overlayColor: "rgba(0, 0, 0, 0.2)",
-      darkOverlayColor: "rgba(0, 0, 0, 0.4)",
       opacity: 1,
+      colors: {
+        light: {
+          background: '#ffffff',
+          text: '#111827',
+          border: '#0000001a',
+          overlay: '#00000033',
+          secondary: '#6b7280',
+          hover: '#0000000a'
+        },
+        dark: {
+          background: '#111827',
+          text: '#ffffff',
+          border: '#ffffff1a',
+          overlay: '#00000066',
+          secondary: '#9ca3af',
+          hover: '#ffffff0a'
+        }
+      }
     },
   },
 

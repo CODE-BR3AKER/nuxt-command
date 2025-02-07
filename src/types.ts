@@ -21,11 +21,26 @@ export interface CommandMenuOptions {
   style?: {
     maxWidth?: string;
     minWidth?: string;
-    backgroundColor?: string;
-    darkBackgroundColor?: string;
-    overlayColor?: string;
-    darkOverlayColor?: string;
-    blur?: string;
     opacity?: number;
+    colors?: {
+      light?: {
+        background?: string;
+        text?: string;
+        border?: string;
+        overlay?: string;
+        secondary?: string;
+        hover?: string;
+        active?: string;
+        inactive?: string; // or ghost to be seen
+      };
+      dark?: {
+        background?: string;
+        text?: string;
+        border?: string;
+        overlay?: string;
+        secondary?: string;
+        hover?: string;
+      };
+    };
   };
 }

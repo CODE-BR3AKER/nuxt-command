@@ -78,7 +78,7 @@ defineEmits<{
 
 .command-menu-item:hover,
 .command-menu-item--selected {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--command-hover-bg);
 }
 
 .command-menu-item__content {
@@ -88,20 +88,20 @@ defineEmits<{
 }
 
 .command-menu-item__icon {
-  color: #6b7280;
+  color: var(--command-secondary-color);
   flex-shrink: 0;
 }
 
 .command-menu-item__label {
   font-size: 14px;
-  color: #374151;
+  color: var(--command-text-color);
 }
 
 .command-menu-item__shortcut {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #9ca3af;
+  color: var(--command-secondary-color);
   font-size: 12px;
   margin-left: 12px;
 }
@@ -113,10 +113,10 @@ defineEmits<{
 }
 
 .command-menu-item--active {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--command-hover-bg);
 }
 
 .command-menu-item__active {
-  color: #10B981; /* Emerald-500 */
+  color: var(--command-active-color);
 }
 </style>
