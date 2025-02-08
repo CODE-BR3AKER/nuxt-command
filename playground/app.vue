@@ -1,27 +1,33 @@
 <template>
   <div class="min-h-screen dark:bg-gray-900 dark:text-white">
-    <CommandMenu :items="menuItems" :theme="colorMode.value"/>
-
-    <header class="border-b dark:border-gray-800 p-4">
-      <div class="container mx-auto flex justify-between items-center">
-        <NuxtLink to="/" class="text-xl font-bold">Nuxt Command Blog</NuxtLink>
+     <!-- Header -->
+     <header class="border-b dark:border-gray-800 py-4 max-w-6xl mx-auto">
+      <div class="container mx-auto px-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Nuxt Command Playground</h1>
         <div class="flex items-center gap-4">
-          <button @click="toggleColorMode" class="p-2">
-            <span v-if="colorMode.value === 'dark'">🌙</span>
-            <span v-else>☀️</span>
+          <button
+            class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            @click="toggleColorMode"
+          >
+            <Sun v-if="colorMode.value === 'dark'" class="w-5 h-5" />
+            <Moon v-else class="w-5 h-5" />
           </button>
-          <button @click="$command.toggle" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-md">
-            ⌘K
+          <button
+            class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            @click="$command.toggle"
+          >
+            <Search class="w-5 h-5" />
           </button>
         </div>
       </div>
     </header>
-
+    <CommandMenu :items="menuItems" :theme="colorMode.value"/>
     <NuxtPage />
   </div>
 </template>
 
 <script setup>
+import { Sun, Moon, Search } from 'lucide-vue-next'
 const colorMode = useColorMode()
 const { $command } = useNuxtApp()
 
@@ -33,22 +39,37 @@ const { data: posts } = await useAsyncData('posts', () =>
   queryCollection('blog').all()
 )
 
+const { data: searchSections } = await useAsyncData('search', () =>
+  queryCollectionSearchSections('content')
+)
+
 const menuItems = computed(() => {
   if (!posts.value) return []
 
   return [
     {
       label: 'Blog Posts',
-      items: posts.value.map(post => ({
-        id: post.path,
-        label: post.title,
-        description: post.description || 'No description',
-        icon: 'FileText',
-        handler: () => {
-          navigateTo(post.path)
-          $command.toggle()
+      items: posts.value.map(post => {
+        // Find all sections for this post
+        const postSections = searchSections.value?.filter(section =>
+          section.id.startsWith(post.path)
+        ) || []
+
+        // Combine all section content for full-text search
+        const fullContent = postSections.map(s => s.content).join(' ')
+
+        return {
+          id: post.path,
+          label: post.title,
+          description: post.description || 'No description',
+          fullContent, // Add full content for Fuse.js to search
+          icon: 'FileText',
+          handler: () => {
+            navigateTo(post.path)
+            $command.toggle()
+          }
         }
-      }))
+      })
     },
     {
       label: 'Theme',

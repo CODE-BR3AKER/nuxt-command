@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
-import { useEventListener } from "@vueuse/core";
 import type { CommandMenuItem, CommandMenuGroup } from "../../types";
 import Fuse from "fuse.js";
+import { useRuntimeConfig } from '#imports'
 
 const isOpen = ref(false);
 const search = ref("");
@@ -19,16 +19,34 @@ const flattenedItems = computed(() => {
   return filteredItems.value.flatMap(group => group.items);
 });
 
+function calculateContextSize(maxWidth: string = '600px'): number {
+  // Convert maxWidth to number (remove 'px' and parse)
+  const width = parseInt(maxWidth.replace('px', ''));
+
+  // Rough estimate: 1 char ≈ 8px in typical font
+  // We want context to be about 30% of max width
+  // So: (maxWidth * 0.3) / 8px per char
+  const contextSize = Math.floor((width * 0.3) / 8);
+
+  // Clamp between 15 and 40 chars for readability
+  return Math.min(Math.max(contextSize, 15), 40);
+}
+
 const filteredItems = computed(() => {
   if (!search.value) {
     searchResults.value = [];
     return items.value;
   }
 
+  const config = useRuntimeConfig();
+  const maxWidth = config.public.commandMenu?.style?.maxWidth || '600px';
+  const contextSize = calculateContextSize(maxWidth);
+
   const fuse = new Fuse(items.value.flatMap(group => group.items), {
     keys: [
       'label',
       'description',
+      'fullContent',
     ],
     threshold: 0.4,
     distance: 100,
@@ -44,9 +62,54 @@ const filteredItems = computed(() => {
 
   return items.value.map(group => ({
     ...group,
-    items: group.items.filter(item =>
-      searchResults.value.some(result => result.item.id === item.id)
-    )
+    items: group.items.map(item => {
+      const result = searchResults.value.find(r => r.item.id === item.id);
+      if (!result) return null;
+
+      // Find best match in fullContent
+      const contentMatch = result.matches?.find(m => m.key === 'fullContent');
+      if (contentMatch && contentMatch.indices.length > 0) {
+        const content = result.item.fullContent;
+
+        // Find the best matching section (closest to exact match)
+        let bestMatch = contentMatch.indices[0];
+        let bestMatchText = '';
+
+        contentMatch.indices.forEach(([start, end]) => {
+          const matchText = content.slice(start, end + 1);
+          if (matchText.toLowerCase() === search.value.toLowerCase()) {
+            bestMatch = [start, end];
+            bestMatchText = matchText;
+          }
+        });
+
+        if (!bestMatchText) {
+          bestMatchText = content.slice(bestMatch[0], bestMatch[1] + 1);
+        }
+
+        // Use calculated contextSize instead of hardcoded value
+        const contextStart = content.lastIndexOf(' ', bestMatch[0] - contextSize) + 1;
+        const contextEnd = content.indexOf(' ', bestMatch[1] + contextSize);
+
+        // Create snippet with highlighted match
+        const before = content.slice(contextStart, bestMatch[0]);
+        const after = content.slice(bestMatch[1] + 1, contextEnd === -1 ? content.length : contextEnd);
+
+        const isExactMatch = bestMatchText.toLowerCase() === search.value.toLowerCase();
+        const markClass = isExactMatch ? 'mark-exact' : 'mark-partial';
+
+        const snippet = '...' +
+          before +
+          `<mark class="${markClass}">` + bestMatchText + '</mark>' +
+          after + '...';
+
+        return {
+          ...item,
+          description: snippet
+        };
+      }
+      return item;
+    }).filter(Boolean)
   })).filter(group => group.items.length > 0);
 });
 

@@ -7,6 +7,7 @@ export interface CommandMenuItem {
   id: string;
   label: string;
   description?: string;
+  fullContent?: string;
   icon?: string;
   shortcut?: string[];
   handler?: () => void;
