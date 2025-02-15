@@ -3,7 +3,7 @@
      <!-- Header -->
      <header class="border-b dark:border-gray-800 py-4 max-w-6xl mx-auto">
       <div class="container mx-auto px-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Nuxt Command Playground</h1>
+        <h1 class="text-2xl font-bold">Playground</h1>
         <div class="flex items-center gap-4">
           <button
             class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"

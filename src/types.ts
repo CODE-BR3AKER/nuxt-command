@@ -10,6 +10,8 @@ export interface CommandMenuItem {
   fullContent?: string;
   icon?: string;
   shortcut?: string[];
+  to: string;
+  href: string;
   handler?: () => void;
 }
 

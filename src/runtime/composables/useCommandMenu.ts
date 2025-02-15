@@ -1,5 +1,6 @@
 import { ref, computed } from "vue";
 import type { CommandMenuItem, CommandMenuGroup } from "../../types";
+import type { FuseResult } from "fuse.js";
 import Fuse from "fuse.js";
 import { useRuntimeConfig } from '#imports'
 
@@ -9,7 +10,7 @@ const items = ref<CommandMenuGroup[]>([]);
 const selectedIndex = ref(-1);
 const minimal = ref(true);
 const transparency = ref(0.2);
-const searchResults = ref<Fuse.FuseResult<CommandMenuItem>[]>([]);
+const searchResults = ref<FuseResult<CommandMenuItem>[]>([]);
 
 // Get flattened list of items for navigation
 const flattenedItems = computed(() => {
@@ -48,14 +49,35 @@ const filteredItems = computed(() => {
       'description',
       'fullContent',
     ],
-    threshold: 0.4,
+    threshold: 0.2,
     distance: 100,
     includeMatches: true,
     ignoreLocation: true,
     useExtendedSearch: true,
     minMatchCharLength: 2,
     shouldSort: true,
-    findAllMatches: true
+    findAllMatches: true,
+    sortFn: (a, b) => {
+      const searchLower = search.value.toLowerCase();
+
+      const aExact = a.matches?.some(match =>
+        match.value?.toLowerCase() === searchLower ||
+        match.indices.some(([start, end]) =>
+          match.value?.slice(start, end + 1).toLowerCase() === searchLower
+        )
+      );
+
+      const bExact = b.matches?.some(match =>
+        match.value?.toLowerCase() === searchLower ||
+        match.indices.some(([start, end]) =>
+          match.value?.slice(start, end + 1).toLowerCase() === searchLower
+        )
+      );
+
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+      return a.score - b.score;
+    }
   });
 
   searchResults.value = fuse.search(search.value);
@@ -66,41 +88,42 @@ const filteredItems = computed(() => {
       const result = searchResults.value.find(r => r.item.id === item.id);
       if (!result) return null;
 
-      // Find best match in fullContent
       const contentMatch = result.matches?.find(m => m.key === 'fullContent');
-      if (contentMatch && contentMatch.indices.length > 0) {
-        const content = result.item.fullContent;
+      if (contentMatch?.indices && contentMatch.value) {
+        const content = contentMatch.value;
+        const searchLower = search.value.toLowerCase();
 
-        // Find the best matching section (closest to exact match)
-        let bestMatch = contentMatch.indices[0];
-        let bestMatchText = '';
+        // Sort indices by match quality
+        const sortedIndices = [...contentMatch.indices].sort((a, b) => {
+          const aText = content.slice(a[0], a[1] + 1).toLowerCase();
+          const bText = content.slice(b[0], b[1] + 1).toLowerCase();
 
-        contentMatch.indices.forEach(([start, end]) => {
-          const matchText = content.slice(start, end + 1);
-          if (matchText.toLowerCase() === search.value.toLowerCase()) {
-            bestMatch = [start, end];
-            bestMatchText = matchText;
-          }
+          // Prioritize matches that start with the search term
+          const aStartsWith = aText.startsWith(searchLower);
+          const bStartsWith = bText.startsWith(searchLower);
+          if (aStartsWith && !bStartsWith) return -1;
+          if (!aStartsWith && bStartsWith) return 1;
+
+          // Then prioritize longer matches
+          return bText.length - aText.length;
         });
 
-        if (!bestMatchText) {
-          bestMatchText = content.slice(bestMatch[0], bestMatch[1] + 1);
-        }
+        const bestMatch = sortedIndices[0];
+        const bestMatchText = content.slice(bestMatch[0], bestMatch[1] + 1);
 
-        // Use calculated contextSize instead of hardcoded value
         const contextStart = content.lastIndexOf(' ', bestMatch[0] - contextSize) + 1;
         const contextEnd = content.indexOf(' ', bestMatch[1] + contextSize);
 
-        // Create snippet with highlighted match
         const before = content.slice(contextStart, bestMatch[0]);
         const after = content.slice(bestMatch[1] + 1, contextEnd === -1 ? content.length : contextEnd);
 
-        const isExactMatch = bestMatchText.toLowerCase() === search.value.toLowerCase();
-        const markClass = isExactMatch ? 'mark-exact' : 'mark-partial';
+        const isExactMatch = bestMatchText.toLowerCase() === searchLower;
 
         const snippet = '...' +
           before +
-          `<mark class="${markClass}">` + bestMatchText + '</mark>' +
+          `<mark class='${isExactMatch ? 'mark-exact' : 'mark-partial'}'>` +
+          bestMatchText +
+          '</mark>' +
           after + '...';
 
         return {

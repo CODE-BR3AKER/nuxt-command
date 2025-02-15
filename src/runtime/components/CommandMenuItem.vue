@@ -41,31 +41,34 @@ const props = defineProps<{
 const { search, getMatchesForItem } = useCommandMenu()
 
 const highlightedDescription = computed(() => {
-  if (!props.item.description || !search.value) return props.item.description
+  if (!props.item.description || !search.value) return props.item.description;
 
-  const matches = getMatchesForItem(props.item)
-  if (!matches?.length) return props.item.description
+  const matches = getMatchesForItem(props.item);
+  if (!matches?.length) return props.item.description;
 
-  let desc = props.item.description
-  const searchLower = search.value.toLowerCase()
+  let desc = props.item.description;
+  const searchLower = search.value.toLowerCase();
 
-  // Sort indices in reverse to avoid index shifting when replacing
+  // Don't process if the description already contains mark tags
+  if (desc.includes('<mark')) return desc;
+
   const indices = matches
     .filter(match => match.key === 'description')
     .flatMap(match => match.indices)
-    .sort((a, b) => b[0] - a[0])
+    .sort((a, b) => b[0] - a[0]);
 
   indices.forEach(([start, end]) => {
-    const matchText = desc.slice(start, end + 1)
-    const isExactMatch = matchText.toLowerCase() === searchLower
-    const markClass = isExactMatch ? 'mark-exact' : 'mark-partial'
+    const matchText = desc.slice(start, end + 1);
+    const isExactMatch = matchText.toLowerCase() === searchLower;
+    // Use single quotes for consistency
+    const markClass = isExactMatch ? 'mark-exact' : 'mark-partial';
 
-    const before = desc.slice(0, start)
-    const after = desc.slice(end + 1)
-    desc = before + `<mark class="${markClass}">` + matchText + '</mark>' + after
-  })
+    const before = desc.slice(0, start);
+    const after = desc.slice(end + 1);
+    desc = before + `<mark class='${markClass}'>` + matchText + '</mark>' + after;
+  });
 
-  return desc
+  return desc;
 })
 
 // Get icon component dynamically
@@ -75,7 +78,7 @@ const getIcon = () => {
     .split('-')
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
     .join('')
-  return lucideIcons[iconName] || lucideIcons.FileText
+  return lucideIcons[iconName as keyof typeof lucideIcons] || lucideIcons.FileText
 }
 
 // Format shortcut key for display

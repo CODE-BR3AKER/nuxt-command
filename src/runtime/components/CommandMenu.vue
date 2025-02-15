@@ -34,7 +34,7 @@
                 <div v-if="group.label" class="command-group__label">{{ group.label }}</div>
                 <CommandMenuItem
                   v-for="(item, itemIndex) in group.items"
-                  :key="item.id"
+                  :key="item?.id"
                   :item="item"
                   :selected="isItemSelected(groupIndex, itemIndex)"
                   @select="handleSelect"
