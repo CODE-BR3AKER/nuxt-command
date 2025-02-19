@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     style: {
       maxWidth: "400px",
       opacity: 1,
-      colors: {
+      /* colors: {
         light: {
           background: '#ffffff',
           text: '#111827',
@@ -38,7 +38,7 @@ export default defineNuxtConfig({
           secondary: '#9ca3af',
           hover: '#ffffff0a'
         }
-      }
+      } */
     },
   },
 

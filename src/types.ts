@@ -26,6 +26,7 @@ export interface CommandMenuOptions {
     maxWidth?: string;
     minWidth?: string;
     opacity?: number;
+    blur?: number;
     colors?: {
       light?: {
         background?: string;

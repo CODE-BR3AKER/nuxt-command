@@ -28,11 +28,25 @@ export default defineNuxtModule<CommandMenuOptions>({
     style: {
       maxWidth: "600px",
       minWidth: "300px",
-      backgroundColor: "rgba(255, 255, 255, 0.9)",
-      darkBackgroundColor: "rgba(23, 23, 23, 0.9)",
-      overlayColor: "rgba(0, 0, 0, 0.2)",
-      darkOverlayColor: "rgba(0, 0, 0, 0.4)",
-      blur: "12px",
+      colors: {
+        light: {
+          background: '#ffffff',
+          text: '#111827',
+          border: '#0000001a',
+          overlay: '#00000033',
+          secondary: '#6b7280',
+          hover: '#0000000a'
+        },
+        dark: {
+          background: '#111827',
+          text: '#ffffff',
+          border: '#ffffff1a',
+          overlay: '#00000066',
+          secondary: '#9ca3af',
+          hover: '#ffffff0a'
+        }
+      },
+      blur: 12,
       opacity: 1
     },
   },
