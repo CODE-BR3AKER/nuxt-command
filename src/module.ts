@@ -5,9 +5,18 @@ import {
   addComponent,
 } from "@nuxt/kit";
 import type { CommandMenuOptions } from "./types";
+import type { IFuseOptions } from "fuse.js";
+import type { CommandMenuItem } from "./types";
 
 // Module options TypeScript interface definition
 export interface ModuleOptions {}
+
+const defaultFuseOptions: IFuseOptions<CommandMenuItem> = {
+  keys: ["label", "description", "fullContent"],
+  threshold: 0.2,
+  distance: 100,
+  minMatchCharLength: 2,
+};
 
 export default defineNuxtModule<CommandMenuOptions>({
   meta: {
@@ -30,25 +39,28 @@ export default defineNuxtModule<CommandMenuOptions>({
       minWidth: "300px",
       colors: {
         light: {
-          background: '#ffffff',
-          text: '#111827',
-          border: '#0000001a',
-          overlay: '#00000033',
-          secondary: '#6b7280',
-          hover: '#0000000a'
+          background: "#ffffff",
+          text: "#111827",
+          border: "#0000001a",
+          overlay: "#00000033",
+          secondary: "#6b7280",
+          hover: "#F8F9FB",
+          active: "#F2F5F9",
         },
         dark: {
-          background: '#111827',
-          text: '#ffffff',
-          border: '#ffffff1a',
-          overlay: '#00000066',
-          secondary: '#9ca3af',
-          hover: '#ffffff0a'
-        }
+          background: "#111827",
+          text: "#ffffff",
+          border: "#ffffff1a",
+          overlay: "#00000066",
+          secondary: "#9ca3af",
+          hover: "#182033",
+          active: "#1F283B",
+        },
       },
-      blur: 12,
-      opacity: 1
+      blur: "12px",
+      opacity: 1,
     },
+    fuseOptions: defaultFuseOptions,
   },
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);

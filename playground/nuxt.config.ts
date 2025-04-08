@@ -1,16 +1,14 @@
 export default defineNuxtConfig({
   modules: [
-    '../src/module',
-    '@nuxt/content',
-    '@nuxtjs/color-mode',
-    '@nuxtjs/tailwindcss'
+    "../src/module",
+    "@nuxt/content",
+    "@nuxtjs/color-mode",
+    "@nuxtjs/tailwindcss",
   ],
   colorMode: {
-    classSuffix: ''
+    classSuffix: "",
   },
-  content: {
-
-  },
+  content: {},
   tailwindcss: {
     exposeConfig: true,
     viewer: true,

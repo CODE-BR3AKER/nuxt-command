@@ -1,3 +1,5 @@
+import type { IFuseOptions } from "fuse.js";
+
 export interface CommandMenuGroup {
   label?: string;
   items: CommandMenuItem[];
@@ -26,7 +28,7 @@ export interface CommandMenuOptions {
     maxWidth?: string;
     minWidth?: string;
     opacity?: number;
-    blur?: number;
+    blur?: string;
     colors?: {
       light?: {
         background?: string;
@@ -36,7 +38,6 @@ export interface CommandMenuOptions {
         secondary?: string;
         hover?: string;
         active?: string;
-        inactive?: string; // or ghost to be seen
       };
       dark?: {
         background?: string;
@@ -45,7 +46,9 @@ export interface CommandMenuOptions {
         overlay?: string;
         secondary?: string;
         hover?: string;
+        active?: string;
       };
     };
   };
+  fuseOptions?: IFuseOptions<CommandMenuItem>; // Using the proper Fuse.js type
 }

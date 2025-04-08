@@ -14,7 +14,11 @@
           @click.stop
         >
           <div class="command-search">
-            <Search class="command-search__icon" :size="16" :stroke-width="1.5" />
+            <Search
+              class="command-search__icon"
+              :size="16"
+              :stroke-width="1.5"
+            />
             <input
               v-model="searchInput"
               type="text"
@@ -30,8 +34,14 @@
 
           <div v-if="showResults" class="command-results">
             <template v-if="filteredItems.length">
-              <div v-for="(group, groupIndex) in filteredItems" :key="groupIndex" class="command-group">
-                <div v-if="group.label" class="command-group__label">{{ group.label }}</div>
+              <div
+                v-for="(group, groupIndex) in filteredItems"
+                :key="groupIndex"
+                class="command-group"
+              >
+                <div v-if="group.label" class="command-group__label">
+                  {{ group.label }}
+                </div>
                 <CommandMenuItem
                   v-for="(item, itemIndex) in group.items"
                   :key="item?.id"
@@ -55,26 +65,26 @@
 import { useCommandMenu } from "../composables/useCommandMenu";
 import { useRuntimeConfig, onMounted, ref, computed, watch } from "#imports";
 import { Search } from "lucide-vue-next";
-import type { PropType } from 'vue'
+import type { PropType } from "vue";
 import { nextTick } from "vue";
-import type { CommandMenuGroup } from '../../types'
-import { useCommandTheme } from '../composables/useCommandTheme'
+import type { CommandMenuGroup } from "../../types";
+import { useCommandTheme } from "../composables/useCommandTheme";
 
 const props = defineProps({
   items: {
     type: Array as PropType<CommandMenuGroup[]>,
-    required: true
+    required: true,
   },
   theme: {
-    type: String as PropType<'light' | 'dark' | 'system'>,
-    default: 'system'
-  }
-})
+    type: String as PropType<"light" | "dark" | "system">,
+    default: "system",
+  },
+});
 
 const config = useRuntimeConfig();
 const options = config.public.commandMenu;
 
-const searchInput = ref('');
+const searchInput = ref("");
 
 const {
   isOpen,
@@ -92,7 +102,7 @@ const {
   setMinimal,
 } = useCommandMenu();
 
-const { initializeThemeColors } = useCommandTheme()
+const { initializeThemeColors } = useCommandTheme();
 
 // Watch for props.items changes and update the composable
 watch(
@@ -108,7 +118,6 @@ watch(searchInput, (value) => {
   search.value = value;
 });
 
-
 const modalStyle = computed(() => ({
   maxWidth: options?.style?.maxWidth || "600px",
   minWidth: options?.style?.minWidth || "300px",
@@ -121,13 +130,15 @@ onMounted(() => {
   watch(isOpen, (newValue) => {
     if (newValue) {
       nextTick(() => {
-        const input = document.querySelector('.command-search__input') as HTMLInputElement;
+        const input = document.querySelector(
+          ".command-search__input"
+        ) as HTMLInputElement;
         if (input) input.focus();
       });
     }
   });
   setMinimal(options?.minimal ?? true);
-  initializeThemeColors()
+  initializeThemeColors();
 });
 
 const isItemSelected = (groupIndex: number, itemIndex: number) => {
@@ -152,6 +163,7 @@ const isItemSelected = (groupIndex: number, itemIndex: number) => {
   --command-overlay-color: var(--command-light-overlay);
   --command-secondary-color: var(--command-light-secondary);
   --command-hover-bg: var(--command-light-hover);
+  --command-active-bg: var(--command-light-active);
 }
 
 .command-theme-dark {
@@ -161,6 +173,7 @@ const isItemSelected = (groupIndex: number, itemIndex: number) => {
   --command-overlay-color: var(--command-dark-overlay);
   --command-secondary-color: var(--command-dark-secondary);
   --command-hover-bg: var(--command-dark-hover);
+  --command-active-bg: var(--command-dark-active);
 }
 
 .command-overlay {
